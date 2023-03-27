@@ -14,6 +14,12 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        {%  block navbar %}
+            {{ include('_navbar.html.twig', {current: app.current_route}, with_context = false) }}
+            {# {% block navbar '' %} --> will overwrite navbar so it will not be shown #}
+        {% endblock %}
+        <aside>{{ render(controller('App\\Controller\\MovieController::getDecades')) }}</aside>
+        {% block body %}
+        {% endblock %}
     </body>
 </html>

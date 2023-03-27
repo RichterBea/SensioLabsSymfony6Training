@@ -29,8 +29,27 @@ class MovieController extends AbstractController
     ]
     public function show(int $id): Response
     {
-        return $this->render('movie/index.html.twig', [
-            'controller_name' => 'MovieController::show - id :' . $id,
+        $movie = [
+            'id' => $id,
+            'title' => 'Star Wars IV: A New Hope',
+            'releasedAt' => new \DateTimeImmutable('25 May 1977'),
+            'genre' => ['Action', 'Adventure', 'Fantasy']
+        ];
+
+        return $this->render('movie/show.html.twig', [
+            'movie' => $movie,
+        ]);
+    }
+
+    #[Route('/decades', name: 'app_movie_decades')]
+    public function getDecades(): Response
+    {
+        return $this->render( 'movie/_decades.html.twig', [
+            'decades' => [
+                '1950',
+                '1960',
+                '1970'
+            ]
         ]);
     }
 }
