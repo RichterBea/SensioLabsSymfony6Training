@@ -39,20 +39,42 @@ class BookRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Book[] Returns an array of Book objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('b')
-//            ->andWhere('b.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('b.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    // DSQL -> doctrine sql
+    public function findFromDate(\DateTimeImmutable$date): array
+    {
+        return $this->getEntityManager()->createQuery(
+            'SELECT b FROM App\Entity\Book WHERE b.releasedAt >= :date'
+        )->setParameter('date', $date)->getResult();
+    }
+
+    public function findBookByTitleWord(string $word): array
+    {
+        $qb = $this->createQueryBuilder('b');
+        $qb->select('b')
+            ->andWhere($qb->expr()->like('b.title', $qb->expr()->literal('%'.$word.'%')))
+            //->setParameter('word', '%'.$word.'%')
+                ->andWhere($qb->expr()->orX(
+                    $qb->expr()->gte('b.releasedAt', new \DateTimeImmutable('01-01-1980')),
+                    $qb->expr()->count()
+                ))
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Book[] Returns an array of Book objects
+     */
+    public function findByExampleField($value): array
+    {
+        return $this->createQueryBuilder('b')
+            ->andWhere('b.exampleField = :val')
+            ->setParameter('val', $value)
+            ->orderBy('b.id', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 
 //    public function findOneBySomeField($value): ?Book
 //    {

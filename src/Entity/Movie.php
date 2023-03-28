@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MovieRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +33,14 @@ class Movie
 
     #[ORM\Column(length: 20)]
     private ?string $price = null;
+
+    #[ORM\ManyToMany(targetEntity: Genre::class, inversedBy: 'movies')]
+    private Collection $genre;
+
+    public function __construct()
+    {
+        $this->genre = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -105,6 +115,30 @@ class Movie
     public function setPrice(string $price): self
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Genre>
+     */
+    public function getGenre(): Collection
+    {
+        return $this->genre;
+    }
+
+    public function addGenre(Genre $genre): self
+    {
+        if (!$this->genre->contains($genre)) {
+            $this->genre->add($genre);
+        }
+
+        return $this;
+    }
+
+    public function removeGenre(Genre $genre): self
+    {
+        $this->genre->removeElement($genre);
 
         return $this;
     }

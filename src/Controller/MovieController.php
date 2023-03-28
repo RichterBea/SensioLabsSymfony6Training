@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\MovieRepository;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -50,6 +51,14 @@ class MovieController extends AbstractController
                 '1960',
                 '1970'
             ]
+        ]);
+    }
+
+    #[Route('/{id<\d+>}', name: 'app_movie_details',)]
+    public function details(int $id, MovieRepository $repository): Response
+    {
+        return $this->render('movie/details.html.twig', [
+            'movie' => $repository->find($id),
         ]);
     }
 }

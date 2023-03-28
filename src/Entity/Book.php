@@ -3,10 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\BookRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
+// will refere only to the one called object - to mark entity as updated
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class Book
 {
     #[ORM\Id]
@@ -31,6 +35,19 @@ class Book
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $plot = null;
+
+    // cascade means if the corresponding book is persist/updated or removed it will search and update the comment
+    #[ORM\OneToMany(mappedBy: 'book', targetEntity: Comment::class, cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    private Collection $comment;
+
+    #[ORM\ManyToMany(targetEntity: BookGenre::class, inversedBy: 'books')]
+    private Collection $genres;
+
+    public function __construct()
+    {
+        $this->comment = new ArrayCollection();
+        $this->genres = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -93,6 +110,60 @@ class Book
     public function setPlot(?string $plot): self
     {
         $this->plot = $plot;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComment(): Collection
+    {
+        return $this->comment;
+    }
+
+    public function addComment(Comment $comment): self
+    {
+        if (!$this->comment->contains($comment)) {
+            $this->comment->add($comment);
+            $comment->setBook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): self
+    {
+        if ($this->comment->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getBook() === $this) {
+                $comment->setBook(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BookGenre>
+     */
+    public function getGenres(): Collection
+    {
+        return $this->genres;
+    }
+
+    public function addGenre(BookGenre $genre): self
+    {
+        if (!$this->genres->contains($genre)) {
+            $this->genres->add($genre);
+        }
+
+        return $this;
+    }
+
+    public function removeGenre(BookGenre $genre): self
+    {
+        $this->genres->removeElement($genre);
 
         return $this;
     }

@@ -1,11 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MovieController!{% endblock %}
+{% block title %}New Book{% endblock %}
 
 {% block body %}
-    <h1>Hey! Here you can contact us</h1>
+    <h1>Create new Book</h1>
     {{ form_start(form) }}
-    {{ form_widget(form) }}
+        {{ form_widget(form) }}
     <button type="submit", class="btn btn-primary">Create book</button>
     {{ form_end(form) }}
+
 {% endblock %}
