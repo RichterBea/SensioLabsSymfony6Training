@@ -25,11 +25,20 @@ class BookController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_book_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, BookRepository $repository): Response
+    #[Route('/create', name: 'app_book_create', methods: ['GET', 'POST'])]
+    public function create(Request $request, BookRepository $repository): Response
     {
+        $this->container->get('mailer.mailer');
         $book = new Book();
         $form = $this->createForm(BookType::class, $book);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+           dump($book);
+
+           $repository->save($book, true);
+           return $this->redirectToRoute('app_book_create');
+        }
 
         return $this->render('book/new.html.twig', [
             'form' => $form,

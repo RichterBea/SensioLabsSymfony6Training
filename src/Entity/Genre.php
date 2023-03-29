@@ -21,7 +21,7 @@ class Genre
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $poster = null;
 
-    #[ORM\ManyToMany(targetEntity: Movie::class, mappedBy: 'genre')]
+    #[ORM\ManyToMany(targetEntity: Movie::class, mappedBy: 'genre', cascade: ['persist'])]
     private Collection $movies;
 
     public function __construct()

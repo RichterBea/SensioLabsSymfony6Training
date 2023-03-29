@@ -52,8 +52,6 @@ class MovieRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
-
-        return $this;
     }
 
 //    public function findOneBySomeField($value): ?Movie

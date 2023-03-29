@@ -2,10 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Movie;
+use App\Form\MovieType;
+use App\Movie\MovieProvider;
+use App\Movie\OmdbApiConsumer;
+use App\Movie\OmdbMovieTransformer;
 use App\Repository\MovieRepository;
-use Psr\Container\ContainerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/movie')]
@@ -59,6 +64,33 @@ class MovieController extends AbstractController
     {
         return $this->render('movie/details.html.twig', [
             'movie' => $repository->find($id),
+        ]);
+    }
+
+    #[Route('/omdb/{title}', name: 'app_movie_omdb')]
+    public function omdb(string $title, MovieProvider $provider): Response
+    {
+        return $this->render('movie/details.html.twig', [
+            'movie' => $provider->getMovie(OmdbApiConsumer::MODE_TITLE, $title),
+        ]);
+    }
+
+    #[Route('/create', name: 'app_movie_create', methods: ['GET', 'POST'])]
+    public function create(Request $request, MovieRepository $repository): Response
+    {
+        $movie = new Movie();
+        $form = $this->createForm(MovieType::class, $movie);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            dump($movie);
+
+            $repository->save($movie, true);
+            return $this->redirectToRoute('app_movie_create');
+        }
+
+        return $this->render('movie/new.html.twig', [
+            'form' => $form,
         ]);
     }
 }

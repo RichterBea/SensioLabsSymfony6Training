@@ -2,14 +2,17 @@
 
 // use for classes without the scope of entities
 
-
 namespace App\Dto;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class Contact
 {
+    #[Assert\NotBlank]
     private ?string $name = null;
+    #[Assert\Email]
     private ?string $email = null;
     private ?string $subject = null;
+    #[Assert\Length(20,200)]
     private ?string $message = null;
 
     /**

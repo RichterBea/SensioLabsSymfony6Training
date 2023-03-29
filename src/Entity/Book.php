@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 // will refere only to the one called object - to mark entity as updated
@@ -21,12 +22,14 @@ class Book
     #[ORM\Column]
     private ?int $id = null;
 // properties which are not defined with default value, it is not accassible in php8!
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
     #[ORM\Column(length: 25)]
     private ?string $isbn = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $author = null;
 
@@ -36,6 +39,7 @@ class Book
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $plot = null;
 
+    #[Assert\Unique]
     // cascade means if the corresponding book is persist/updated or removed it will search and update the comment
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Comment::class, cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     private Collection $comment;

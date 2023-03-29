@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MovieRepository::class)]
 class Movie
@@ -31,11 +32,17 @@ class Movie
     #[ORM\Column(length: 255)]
     private ?string $country = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 20, nullable: true)]
     private ?string $price = null;
 
-    #[ORM\ManyToMany(targetEntity: Genre::class, inversedBy: 'movies')]
+    #[ORM\ManyToMany(targetEntity: Genre::class, inversedBy: 'movies', cascade: ['persist'])]
     private Collection $genre;
+
+    #[ORM\Column(length: 15, nullable: true)]
+    private ?string $rated = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $imdbId = null;
 
     public function __construct()
     {
@@ -139,6 +146,30 @@ class Movie
     public function removeGenre(Genre $genre): self
     {
         $this->genre->removeElement($genre);
+
+        return $this;
+    }
+
+    public function getRated(): ?string
+    {
+        return $this->rated;
+    }
+
+    public function setRated(?string $rated): self
+    {
+        $this->rated = $rated;
+
+        return $this;
+    }
+
+    public function getImdbId(): ?string
+    {
+        return $this->imdbId;
+    }
+
+    public function setImdbId(?string $imdbId): self
+    {
+        $this->imdbId = $imdbId;
 
         return $this;
     }
