@@ -6,7 +6,6 @@ use App\Entity\Movie;
 use App\Form\MovieType;
 use App\Movie\MovieProvider;
 use App\Movie\OmdbApiConsumer;
-use App\Movie\OmdbMovieTransformer;
 use App\Repository\MovieRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;

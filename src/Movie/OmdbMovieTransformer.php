@@ -8,10 +8,6 @@ use Symfony\Component\Form\DataTransformerInterface;
 
 class OmdbMovieTransformer implements DataTransformerInterface
 {
-    public function __construct(
-        public readonly OmdbApiConsumer $omdbApiConsumer
-    ) {}
-
     public function transform(mixed $value)
     {
         if (!\is_array($value) || !\array_key_exists('Title', $value)) {
@@ -25,6 +21,8 @@ class OmdbMovieTransformer implements DataTransformerInterface
             ->setCountry($value['Country'])
             ->setPlot($value['Plot'])
             ->setReleasedAt(new \DateTimeImmutable($date))
+            ->setImdbId($value['imdbID'])
+            ->setRated($value['Rated'])
         ;
 
         foreach (\explode(', ', $value['Genre']) as $item) {
