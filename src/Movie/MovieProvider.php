@@ -5,6 +5,9 @@ namespace App\Movie;
 use App\Entity\Movie;
 use App\Repository\MovieRepository;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class MovieProvider
 {
@@ -13,12 +16,15 @@ class MovieProvider
         // protected or private
         private readonly OmdbApiConsumer $consumer,
         private readonly OmdbMovieTransformer $transformer,
-        private readonly MovieRepository $repository
+        private readonly MovieRepository $repository,
     ) {}
-    public function getMovie(string $mode, string $value): Movie
+    public function getMovie(string $mode, string $value, TokenInterface $token): Movie
     {
         $this->io?->text('Checking movie title with OMDb...');
         $data = $this->consumer->fetchMovie($mode, $value);
+
+        $age = date_diff(date_create($token->getUser()->getBirthday()), date_create('now'))->y;
+
         if ($entity = $this->repository->findOneBy(['title' => $data['Title']])) {
             return $entity;
         }

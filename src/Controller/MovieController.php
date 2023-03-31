@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Movie;
 use App\Form\MovieType;
+use App\Security\Voter\MovieVoter;
 use App\Movie\MovieProvider;
 use App\Movie\OmdbApiConsumer;
 use App\Repository\MovieRepository;
@@ -46,31 +47,38 @@ class MovieController extends AbstractController
         ]);
     }
 
-    #[Route('/decades', name: 'app_movie_decades')]
-    public function getDecades(): Response
+    public function decades(): Response
     {
-        return $this->render( 'movie/_decades.html.twig', [
+        return $this->render('movie/_decades.html.twig', [
             'decades' => [
-                '1950',
-                '1960',
-                '1970'
-            ]
-        ]);
+                ['year' => '1980'],
+                ['year' => '1990'],
+                ['year' => '2000'],
+            ],
+        ])->setMaxAge(120);
     }
 
     #[Route('/{id<\d+>}', name: 'app_movie_details',)]
-    public function details(int $id, MovieRepository $repository): Response
+    public function details(Movie $movie = null): Response
     {
+        $movie ??= new Movie();
+        $this->denyAccessUnlessGranted(MovieVoter::VIEW, $movie);
+
         return $this->render('movie/details.html.twig', [
-            'movie' => $repository->find($id),
+            'movie' => $movie,
         ]);
     }
+
 
     #[Route('/omdb/{title}', name: 'app_movie_omdb')]
     public function omdb(string $title, MovieProvider $provider): Response
     {
+        $movie = $provider->getMovie(OmdbApiConsumer::MODE_TITLE, $title);
+        $this->denyAccessUnlessGranted(MovieVoter::VIEW, $movie);
+
         return $this->render('movie/details.html.twig', [
             'movie' => $provider->getMovie(OmdbApiConsumer::MODE_TITLE, $title),
+            'movie' => $movie,
         ]);
     }
 
@@ -91,6 +99,20 @@ class MovieController extends AbstractController
         return $this->render('movie/new.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    #[Route('/delete', name: 'app_movie_delete', methods: ['GET', 'POST'])]
+    public function delete(Request $request, Movie $movie, MovieRepository $repository): Response
+    {
+        $form = $this->createForm(MovieType::class, $movie);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $repository->remove($movie, true);
+            return $this->redirectToRoute('app_movie_show');
+        }
+
+        return $this->redirectToRoute('book.list');
     }
 }
 

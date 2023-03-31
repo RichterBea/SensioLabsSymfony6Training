@@ -4,25 +4,24 @@ namespace App\Controller;
 
 use App\Dto\Contact;
 use App\Form\ContactType;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/contact', name: 'app_get_contact', methods: ['GET', 'POST'])]
 class GetContactController extends AbstractController
 {
-    #[Route('/contact',
-        name: 'app_Main_contact',
-        methods: ['GET']
-    )]
     public function __invoke(Request $request): Response
     {
         $dto = new Contact();
-        $form = $this->createForm(ContactType::class);
-        $form->handleRequest($request);
+        $form = $this->createForm(ContactType::class, $dto);
 
+        $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             dump($dto);
+            $this->addFlash('success', 'Your message has been sent');
+
             return $this->redirectToRoute('app_get_contact');
         }
 
@@ -30,5 +29,4 @@ class GetContactController extends AbstractController
             'form' => $form,
         ]);
     }
-
 }

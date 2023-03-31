@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Movie;
 use App\Form\MovieType;
+use App\Security\Voter\MovieVoter;
 use App\Repository\MovieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -51,6 +52,7 @@ class MovieController extends AbstractController
     #[Route('/{id}/edit', name: 'app_admin_movie_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Movie $movie, MovieRepository $movieRepository): Response
     {
+        $this->denyAccessUnlessGranted(MovieVoter::EDIT, $movie);
         $form = $this->createForm(MovieType::class, $movie);
         $form->handleRequest($request);
 

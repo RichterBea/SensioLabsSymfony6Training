@@ -44,9 +44,16 @@ class Movie
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $imdbId = null;
 
+    #[ORM\OneToMany(mappedBy: 'createdBy', targetEntity: User::class)]
+    private Collection $users;
+
+    #[ORM\ManyToOne(inversedBy: 'movies')]
+    private ?User $createdBy = null;
+
     public function __construct()
     {
         $this->genre = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -170,6 +177,48 @@ class Movie
     public function setImdbId(?string $imdbId): self
     {
         $this->imdbId = $imdbId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getCreatedBy() === $this) {
+                $user->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
 
         return $this;
     }

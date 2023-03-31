@@ -10,11 +10,8 @@
             <tr>
                 <th>Id</th>
                 <th>Title</th>
-                <th>Poster</th>
-                <th>Plot</th>
                 <th>ReleasedAt</th>
                 <th>Country</th>
-                <th>Price</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -23,14 +20,12 @@
             <tr>
                 <td>{{ movie.id }}</td>
                 <td>{{ movie.title }}</td>
-                <td>{{ movie.poster }}</td>
-                <td>{{ movie.plot }}</td>
                 <td>{{ movie.releasedAt ? movie.releasedAt|date('Y-m-d H:i:s') : '' }}</td>
                 <td>{{ movie.country }}</td>
-                <td>{{ movie.price }}</td>
                 <td>
                     <a href="{{ path('app_admin_movie_show', {'id': movie.id}) }}">show</a>
                     <a href="{{ path('app_admin_movie_edit', {'id': movie.id}) }}">edit</a>
+                    <a href="{{ path('app_admin_movie_delete', {'id': movie.id}) }}">delete</a>
                 </td>
             </tr>
         {% else %}

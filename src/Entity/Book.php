@@ -10,22 +10,19 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
-// will refere only to the one called object - to mark entity as updated
-#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')] // $bookRepository->save($book) to mark entity as updated
 class Book
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    // to generate a uuid -->
-    // #[ORM\GeneratedValue(strategy: 'CUSTOM']
-    // [ORM\CustomIdGenerator('doctrine.uuid_generator')]
     #[ORM\Column]
     private ?int $id = null;
-// properties which are not defined with default value, it is not accassible in php8!
+
     #[Assert\NotBlank]
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
+    #[Assert\Isbn(type: 'isbn13')]
     #[ORM\Column(length: 25)]
     private ?string $isbn = null;
 
@@ -36,20 +33,24 @@ class Book
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private ?\DateTimeImmutable $releasedAt = null;
 
+    #[Assert\Length(min: 15)]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $plot = null;
 
     #[Assert\Unique]
-    // cascade means if the corresponding book is persist/updated or removed it will search and update the comment
+    #[Assert\Valid]
     #[ORM\OneToMany(mappedBy: 'book', targetEntity: Comment::class, cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
-    private Collection $comment;
+    private Collection $comments;
 
     #[ORM\ManyToMany(targetEntity: BookGenre::class, inversedBy: 'books')]
     private Collection $genres;
 
+    #[ORM\ManyToOne(inversedBy: 'books')]
+    private ?User $createdBy = null;
+
     public function __construct()
     {
-        $this->comment = new ArrayCollection();
+        $this->comments = new ArrayCollection();
         $this->genres = new ArrayCollection();
     }
 
@@ -121,15 +122,15 @@ class Book
     /**
      * @return Collection<int, Comment>
      */
-    public function getComment(): Collection
+    public function getComments(): Collection
     {
-        return $this->comment;
+        return $this->comments;
     }
 
     public function addComment(Comment $comment): self
     {
-        if (!$this->comment->contains($comment)) {
-            $this->comment->add($comment);
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
             $comment->setBook($this);
         }
 
@@ -138,7 +139,7 @@ class Book
 
     public function removeComment(Comment $comment): self
     {
-        if ($this->comment->removeElement($comment)) {
+        if ($this->comments->removeElement($comment)) {
             // set the owning side to null (unless already changed)
             if ($comment->getBook() === $this) {
                 $comment->setBook(null);
@@ -168,6 +169,18 @@ class Book
     public function removeGenre(BookGenre $genre): self
     {
         $this->genres->removeElement($genre);
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
 
         return $this;
     }
