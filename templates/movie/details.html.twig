@@ -12,6 +12,7 @@
             <li>Id : {{ movie.id }}</li>
             <li>Released At : {{ movie.releasedAt|date('d F Y') }}</li>
             <li>Genres : {{ movie.genre|map(genre => genre.name)|join(', ') }}</li>
+            <li>Rating: {{ movie.rated }}</li>
             <div class="card w-50">
                 <img src="{{ movie.poster }}" alt="{{ movie.poster }}">
             </div>

@@ -3,33 +3,50 @@
 namespace App\Movie;
 
 use App\Entity\Movie;
+use App\Entity\User;
 use App\Repository\MovieRepository;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class MovieProvider
 {
     protected ?SymfonyStyle $io = null;
+
     public function __construct(
-        // protected or private
         private readonly OmdbApiConsumer $consumer,
         private readonly OmdbMovieTransformer $transformer,
         private readonly MovieRepository $repository,
+        private readonly ValidatorInterface $validator,
+        private readonly Security $security
     ) {}
-    public function getMovie(string $mode, string $value, TokenInterface $token): Movie
+
+    public function getMovie(string $mode, string $value): Movie
     {
+        // call the API
         $this->io?->text('Checking movie title with OMDb...');
         $data = $this->consumer->fetchMovie($mode, $value);
-
-        $age = date_diff(date_create($token->getUser()->getBirthday()), date_create('now'))->y;
-
+        $this->io?->info('Movie found!');
+        // Check if movie in DB
         if ($entity = $this->repository->findOneBy(['title' => $data['Title']])) {
+            $this->io?->note('Movie already in database!');
+            // if yes, return entity
             return $entity;
         }
+
         // if not, transform result from API
         $movie = $this->transformer->transform($data);
+        $errors = $this->validator->validate($movie);
+
+        if (\count($errors) > 0) {
+            throw new \RuntimeException("Error during validation.");
+        }
+
+        if (($user = $this->security->getUser()) instanceof User) {
+            $movie->setCreatedBy($this->security->getUser());
+        }
+
         // save result to DB
         $this->io?->text('Saving movie to database...');
         $this->repository->save($movie, true);

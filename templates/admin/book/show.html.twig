@@ -34,9 +34,9 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_admin_book_index') }}">back to list</a>
+    <button type="submit" class="btn"><a href="{{ path('app_admin_book_index') }}">back to list</a></button>
 
-    <a href="{{ path('app_admin_book_edit', {'id': book.id}) }}">edit</a>
+    <button type="submit" class="btn"><a href="{{ path('app_admin_book_edit', {'id': book.id}) }}">edit</a></button>
 
-    {{ include('admin/book/_delete_form.html.twig') }}
+    <button type="submit" class="btn">{{ include('admin/book/_delete_form.html.twig') }}</button>
 {% endblock %}
